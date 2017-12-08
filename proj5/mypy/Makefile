@@ -2,13 +2,13 @@ CCC = g++
 LEX = flex
 YACC = bison
 CFLAGS = -g -std=c++11 -O0 -Wno-write-strings -Wno-other
-#LEXFLAGS = -Wno-unused -Wno-sign-compare -Wno-deprecated-register -Wno-wother 
+LEXFLAGS = -Wno-unused -Wno-sign-compare -Wno-deprecated-register -Wno-wother 
 
 #LEXDEBUG = -d
 LEXDEBUG = 
 YACCDEBUG = -vtd
 
-OBJS = main.o parse.tab.o lex.yy.o ast.o symbolTable.o poolOfNodes.o
+OBJS = main.o parse.tab.o lex.yy.o ast.o symbolTable.o poolOfNodes.o tableManager.o functionTable.o
 
 run: $(OBJS)
 	$(CCC) $(CFLAGS) -o run $(OBJS)
@@ -37,6 +37,12 @@ symbolTable.o: includes/symbolTable.cpp includes/symbolTable.h
 poolOfNodes.o: includes/poolOfNodes.cpp includes/poolOfNodes.h \
   includes/node.h
 	$(CCC) $(CFLAGS) -c includes/poolOfNodes.cpp
+
+tableManager.o: includes/symbolTable.h includes/functionTable.h includes/tableManager.cpp
+	$(CCC) $(CFLAGS) -c includes/tableManager.cpp
+
+functionTable.o: includes/functionTable.h includes/functionTable.cpp
+	$(CCC) $(CFLAGS) -c includes/functionTable.cpp
 	
 clean:
 	rm -f run *.o parse.tab.c lex.yy.c

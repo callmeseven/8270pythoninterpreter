@@ -7,6 +7,10 @@
 #include "ast.h"
 #include "symbolTable.h"
 #include "tableManager.h"
+
+// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
+
 //#5
 const Literal* CallNode::eval() const {
 	TableManager& tm = TableManager::getInstance();
@@ -24,7 +28,7 @@ const Literal* CallNode::eval() const {
 }
 //#5
 FuncNode::FuncNode(const std::string id, Node* stmts) : Node(), ident(id), suite(stmts) {
-	TableManager::getInstance().insert(id, suite);
+	TableManager::getInstance().insert_n(id, suite);
 }
 
 //#5
@@ -37,11 +41,14 @@ const Literal* SuiteNode::eval() const {
 	for(const Node* n : stmts) {
 		if(n) n->eval();
 	}
+	std::cout << "suite eval" <<std::endl;
 	return nullptr;
 }
 
+// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 const Literal* IdentNode::eval() const { 
-  const Literal* val = SymbolTable::getInstance().getValue(ident);
+  const Literal* val = TableManager::getInstance().getEntry(ident);
   return val;
 }
 
@@ -67,7 +74,7 @@ AsgBinaryNode::AsgBinaryNode(Node* left, Node* right) :
   BinaryNode(left, right) { 
   const Literal* res = right->eval();
   const std::string n = static_cast<IdentNode*>(left)->getIdent();
-  SymbolTable::getInstance().setValue(n, res);
+  TableManager::getInstance().insert_l(n, res);
 }
 
 
@@ -78,7 +85,7 @@ const Literal* AsgBinaryNode::eval() const {
   const Literal* res = right->eval();
 
   const std::string n = static_cast<IdentNode*>(left)->getIdent();
-  SymbolTable::getInstance().setValue(n, res);
+  TableManager::getInstance().insert_l(n, res);
   return res;
 }
 

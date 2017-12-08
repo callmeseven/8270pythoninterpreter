@@ -10,12 +10,19 @@ class Literal;
 
 class SymbolTable {
 public:
-  static   SymbolTable& getInstance();
-  void     setValue(const std::string& name, const Literal* val);
-  const Literal* getValue(const std::string& name) const;
+	SymbolTable() : table() {}
+
+	bool 	found(const std::string& name) const;	
+ 	
+	void    setValue(const std::string& name, const Literal* val);
+  
+const Literal* 	getValue(const std::string& name) const;
+
+	void 	display() const {}
+
 private:
-  std::map<std::string, const Literal*> table;
-  SymbolTable() : table() {}
+  	std::map<std::string, const Literal*> table;
 };
 
 #endif
+

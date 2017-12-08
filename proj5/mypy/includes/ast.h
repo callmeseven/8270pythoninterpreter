@@ -22,6 +22,18 @@ private:
   std::string ident;
 };
 
+// --------------------------------------------------------------
+// --------------------------------------------------------------
+
+
+class CallNode : public Node {
+public:
+	CallNode(const std::string name): Node(), ident(name) {}
+	virtual const Literal* eval() const;
+private:
+	std::string ident;
+};
+
 class FuncNode : public Node { //#5
 public:
 	FuncNode(const std::string id, Node* stmts);
@@ -43,6 +55,8 @@ private:
 };
 
 
+// --------------------------------------------------------------
+// --------------------------------------------------------------
 class UnaryNode : public Node {
 public:
   UnaryNode(Node* l):Node(),left(l) { }

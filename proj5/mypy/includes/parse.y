@@ -26,7 +26,7 @@
 %token DOUBLESLASHEQUAL DOUBLESTAR DOUBLESTAREQUAL ELIF ELSE ENDMARKER EQEQUAL
 %token EQUAL EXCEPT EXEC FINALLY FOR FROM GLOBAL GREATER GREATEREQUAL GRLT
 %token IF IMPORT IN INDENT IS LAMBDA LBRACE LEFTSHIFT LEFTSHIFTEQUAL LESS
-%token LESSEQUAL LPAR LSQB MINEQUAL NAME NEWLINE NOT NOTEQUAL NUMBER
+%token LESSEQUAL LPAR LSQB MINEQUAL NEWLINE NOT NOTEQUAL NUMBER
 %token OR PASS PERCENT PERCENTEQUAL PLUSEQUAL PRINT RAISE RBRACE RETURN
 %token RIGHTSHIFT RIGHTSHIFTEQUAL RPAR RSQB SEMI SLASHEQUAL STAREQUAL
 %token STRING TILDE TRY VBAREQUAL WHILE WITH YIELD
@@ -34,12 +34,14 @@
 // following is added:
 %token<intNumber> INT
 %token<fltNumber> FLOAT
-%token<id> IDENT
-%type<node> test star_COMMA_test COMMA testlist opt_arglist arglist opt_test arith_expr term factor power atom opt_yield_test pick_yield_expr_testlist
+%token<id> IDENT NAME
+%type<node> print_stmt stmt suite funcdef simple_stmt test star_COMMA_test COMMA testlist arglist opt_test arith_expr term factor power atom opt_yield_test pick_yield_expr_testlist
                         star_EQUAL expr_stmt yield_expr or_test opt_IF_ELSE lambdef IF ELSE and_test LSQB opt_listmaker RSQB LBRACE opt_dictorsetmaker RBRACE
-                        testlist1 BACKQUOTE plus_STRING pick_yield_expr_testlist_comp LAMBDA varargslist COLON argument listarg arglist_postlist dictarg
-                        YIELD star_fpdef_COMMA pick_STAR_DOUBLESTAR fpdef opt_EQUAL_test star_COMMA_fpdef not_test testlist_comp listmaker dictorsetmaker
+                        testlist1 BACKQUOTE plus_STRING pick_yield_expr_testlist_comp LAMBDA varargslist COLON argument  
+                        YIELD pick_STAR_DOUBLESTAR fpdef not_test testlist_comp listmaker dictorsetmaker
                         STRING DOUBLESTAR STAR EQUAL LPAR fplist RPAR NOT comparison expr xor_expr and_expr shift_expr
+
+%type<vec> plus_stmt
 
 %type<id> pick_multop pick_PLUS_MINUS pick_unop augassign
 %left PLUS MINUS
@@ -85,7 +87,8 @@ decorated // Used in: compound_stmt
 	| decorators funcdef
 	;
 funcdef // Used in: decorated, compound_stmt
-	: DEF NAME parameters COLON suite {
+	: DEF IDENT parameters COLON suite {
+		std::cout << "hey jude" << std::endl;
 		$$ = new FuncNode($2, $5);
 		}
 	;
@@ -210,7 +213,9 @@ augassign // Used in: expr_stmt
 	| DOUBLESTAREQUAL {$$="DIVEQ";}
 	;
 print_stmt // Used in: small_stmt
-	: PRINT opt_test { ($2)->eval()->print();}
+	: PRINT opt_test { 
+		std::cout << ($2)->eval() << std::endl;
+		($2)->eval()->print();}
 	| PRINT RIGHTSHIFT test opt_test_2
 	;
 star_COMMA_test // Used in: star_COMMA_test, opt_test, listmaker, testlist_comp, testlist, pick_for_test
@@ -394,6 +399,8 @@ suite // Used in: funcdef, if_stmt, star_ELIF, while_stmt, for_stmt, try_stmt, p
 	: simple_stmt { $$ = $1; }
 	| NEWLINE INDENT plus_stmt DEDENT {
 		$$ = new SuiteNode(*$3);
+		std::cout << "new suite node" << std::endl;
+		($$)->eval();
 		delete $3;
 		}
 	;
@@ -401,10 +408,13 @@ plus_stmt // Used in: suite, plus_stmt
 	: plus_stmt stmt {
 		$$ = $1;
 		$$->push_back($2);
+		std::cout << "plus_stmt" << std::endl;
 		}
 	| stmt {
 		$$ = new std::vector<Node*>();
-
+		$$->push_back($1);
+		std::cout << "plus_stmt  & stmt " << std::endl;
+		}
 	;
 testlist_safe // Used in: list_for
 	: old_test plus_COMMA_old_test opt_COMMA
