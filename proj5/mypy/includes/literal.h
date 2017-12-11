@@ -29,6 +29,8 @@ public:
   virtual const Literal* operator^(const Literal& rhs) const =0;
   virtual const Literal* opPow(float) const=0;
   virtual const Literal* opPow(int) const=0;
+  
+  virtual const float getValue() const =0;
 
   virtual const Literal* eval() const = 0;
   virtual void print() const { 
@@ -39,7 +41,7 @@ public:
 class FloatLiteral: public Literal {
 public:
   FloatLiteral(float _val): val(_val) {}
-
+  virtual const float getValue() const {return val;}
   virtual const Literal* operator+(const Literal& rhs) const  {
     return rhs.opPlus(val);
   }
@@ -133,6 +135,8 @@ public:
   virtual void print() const { 
     std::cout << "cs>:" << val << std::endl; 
   }
+  
+
 private:
   float val;
 };
@@ -140,6 +144,8 @@ private:
 class IntLiteral: public Literal {
 public:
  IntLiteral(int _val): val(_val) {}
+  
+  virtual const float getValue() const {return static_cast<float>(val);}
 
   virtual const Literal* operator+(const Literal& rhs) const  {
     return rhs.opPlus(val);

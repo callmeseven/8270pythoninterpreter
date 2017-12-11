@@ -10,18 +10,21 @@ class Node;
 
 class FunctionTable {
 public:
-	FunctionTable():functions() {}
-	
-	bool	found(const std::string& name) const;
+	static FunctionTable& getInstance();
 
-	void 	setSuite(const std::string& name, const Node* suite);
+        bool    found(const std::string& name) const;
 
-  const	Node*	getSuite(const std::string& name) const;
+        void    setSuite(const std::string& name, const Node* suite);
 
-	void 	display() const {}
+  const Node*   getSuite(const std::string& name) const;
+
+        void    display() const; 
+
 
 private:
-	std::map<std::string, const Node*> functions;
+        std::map<std::string, const Node*> functions;
+	FunctionTable() : functions(){}
 };
 
 #endif
+

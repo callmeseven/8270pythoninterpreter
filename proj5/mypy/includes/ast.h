@@ -8,9 +8,62 @@
 #include <string>
 #include <map>
 #include "literal.h"
+#include "tableManager.h"
 
 extern void yyerror(const char*);
 extern void yyerror(const char*, const char);
+
+
+class ReturnNode: public Node {
+public:
+  ReturnNode(Node* r) : Node(), right(r) { }
+  virtual const Literal* eval() const;
+private:
+  Node* right;
+};
+
+class PrintNode: public Node {
+public:
+  PrintNode(Node* p) : toPrint(p) { };
+  virtual const Literal* eval() const;
+private:
+  Node* toPrint;
+};
+
+
+class SuiteNode : public Node {
+public:
+  SuiteNode(const std::vector<Node*> s) : Node(), stmts(s) { }; // create a vector stmts containing Node*
+  virtual const Literal* eval() const;
+  virtual ~SuiteNode() {}
+private:
+  std::vector<Node*> stmts;
+};
+
+class CallNode : public Node {
+public:
+  CallNode(const std::string name) : Node(), ident(name) {}
+  virtual const Literal* eval() const;
+private:
+  std::string ident;
+};
+
+class IfNode : public Node {
+public:
+  IfNode(Node* t,Node* l, Node* r): Node(), test(t),left(l),right(r) { }
+  virtual const Literal* eval() const;
+private:
+  Node* test;
+  Node* left;
+  Node* right;
+};
+
+
+
+
+
+
+//-------------------------------
 
 class IdentNode : public Node {
 public:
@@ -22,41 +75,6 @@ private:
   std::string ident;
 };
 
-// --------------------------------------------------------------
-// --------------------------------------------------------------
-
-
-class CallNode : public Node {
-public:
-	CallNode(const std::string name): Node(), ident(name) {}
-	virtual const Literal* eval() const;
-private:
-	std::string ident;
-};
-
-class FuncNode : public Node { //#5
-public:
-	FuncNode(const std::string id, Node* stmts);
-	virtual ~FuncNode() {}
-	const std::string getIdent() const { return ident; }
-	virtual const Literal* eval() const;
-private:
-	std::string ident;
-	Node* suite;
-};
-
-class SuiteNode : public Node { //#5
-public:
-	SuiteNode(const std::vector<Node*> s) : Node(), stmts(s) { }
-	virtual ~SuiteNode() {}
-	virtual const Literal* eval() const;
-private:
-	std::vector<Node*> stmts;
-};
-
-
-// --------------------------------------------------------------
-// --------------------------------------------------------------
 class UnaryNode : public Node {
 public:
   UnaryNode(Node* l):Node(),left(l) { }
@@ -135,3 +153,40 @@ public:
   PowBinaryNode(Node* left, Node* right) : BinaryNode(left, right) { }
   virtual const Literal* eval() const;
 };
+
+class LessBinaryNode : public BinaryNode {
+public:
+  LessBinaryNode(Node* left, Node* right) : BinaryNode(left, right) {}
+  virtual const Literal* eval() const;
+};
+
+class GreaterBinaryNode : public BinaryNode {
+public:
+  GreaterBinaryNode(Node* left, Node* right) : BinaryNode(left, right) {}
+  virtual const Literal* eval() const;
+};
+
+class EqEqBinaryNode : public BinaryNode {
+public:
+  EqEqBinaryNode(Node* left, Node* right) : BinaryNode(left, right) {}
+  virtual const Literal* eval() const;
+};
+
+class NotEqBinaryNode : public BinaryNode {
+public:
+  NotEqBinaryNode(Node* left, Node* right) : BinaryNode(left, right) {}
+  virtual const Literal* eval() const;
+};
+
+class GreaterEqBinaryNode : public BinaryNode {
+public:
+  GreaterEqBinaryNode(Node* left, Node* right) : BinaryNode(left, right) {}
+  virtual const Literal* eval() const;
+};
+
+class LessEqBinaryNode : public BinaryNode {
+public:
+  LessEqBinaryNode(Node* left, Node* right) : BinaryNode(left, right) {}
+  virtual const Literal* eval() const;
+};
+

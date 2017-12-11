@@ -6,47 +6,86 @@
 #include <iomanip>
 #include "ast.h"
 #include "symbolTable.h"
-#include "tableManager.h"
 
-// ------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------
 
-//#5
-const Literal* CallNode::eval() const {
-	TableManager& tm = TableManager::getInstance();
-	if ( !tm.checkFunc(ident) ) {
-		std::cout << "function  " << ident << " NOT FOUND " << std::endl;
-		std::exception up = std::exception();
-		throw up;
+const Literal* ReturnNode::eval() const {
+  if ( right != NULL ){
+	const Literal* res = right->eval();
+	TableManager::getInstance().insert("return", res);
+	//std::cout << "return statement" << std::endl;
+	return res;
 	}
-	
-	tm.pushScope();
-	tm.getSuite(ident)->eval();
-	tm.popScope();
-
-	return nullptr;
-}
-//#5
-FuncNode::FuncNode(const std::string id, Node* stmts) : Node(), ident(id), suite(stmts) {
-	TableManager::getInstance().insert_n(id, suite);
+  else {
+	//std::cout << "return statement" << std::endl;
+	const Literal* res = new IntLiteral(19920123);
+	TableManager::getInstance().insert("return", res);
+	return res;
+  	}
 }
 
-//#5
-const Literal* FuncNode::eval() const {
-	std::cout << "never happens" << std::endl;
-	return nullptr;
+
+const Literal* PrintNode::eval() const {
+  if(toPrint->eval()->getValue() == 19920123){
+	toPrint->eval()->print();
+	return nullptr;}
+  else{
+  toPrint->eval()->print();
+  }
+  return nullptr;
 }
-//#5
+
 const Literal* SuiteNode::eval() const {
-	for(const Node* n : stmts) {
-		if(n) n->eval();
-	}
-	std::cout << "suite eval" <<std::endl;
-	return nullptr;
+  std::vector<Node*>::const_iterator ptr = stmts.begin();
+  
+  while( ptr != stmts.end() ){
+    if(*ptr){
+       (*ptr)->eval();
+    }
+    ++ptr;
+  }
+//  std::cout << "suite executed. " << std::endl;
+//  delete ptr;
+  return nullptr;
 }
 
-// ------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------
+
+const Literal* CallNode::eval() const{
+	TableManager& tm = TableManager::getInstance();
+	FunctionTable& ft = FunctionTable::getInstance();
+
+	tm.pushScope();
+	ft.getSuite(ident)->eval();
+	tm.popScope();
+	
+	return nullptr;
+}
+	
+
+const Literal* IfNode::eval() const {
+//  std::cout << "if node" << std::endl;
+  const Literal* t = test->eval();
+  float f = t->getValue();
+  if(f){
+	left->eval();
+        }
+  else{
+        if(right !=NULL){
+                right->eval();
+   }
+    return NULL;
+  }
+}
+
+
+
+
+
+
+
+
+
+//------------------------------------------
+
 const Literal* IdentNode::eval() const { 
   const Literal* val = TableManager::getInstance().getEntry(ident);
   return val;
@@ -74,7 +113,7 @@ AsgBinaryNode::AsgBinaryNode(Node* left, Node* right) :
   BinaryNode(left, right) { 
   const Literal* res = right->eval();
   const std::string n = static_cast<IdentNode*>(left)->getIdent();
-  TableManager::getInstance().insert_l(n, res);
+  TableManager::getInstance().insert(n, res);
 }
 
 
@@ -85,7 +124,7 @@ const Literal* AsgBinaryNode::eval() const {
   const Literal* res = right->eval();
 
   const std::string n = static_cast<IdentNode*>(left)->getIdent();
-  TableManager::getInstance().insert_l(n, res);
+  TableManager::getInstance().insert(n, res);
   return res;
 }
 
@@ -141,3 +180,69 @@ const Literal* PowBinaryNode::eval() const {
   const Literal* y = right->eval();
   return ((*x)^(*y));
 }
+
+const Literal* LessBinaryNode::eval() const {
+  if(!left || !right) {throw "error"; }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  Literal* t = new IntLiteral(1);
+  Literal* f = new IntLiteral(0);
+  if( x->getValue() < y->getValue() ){
+	return t;}
+  else return f;
+}
+
+const Literal* GreaterBinaryNode::eval() const {
+  if(!left || !right) {throw "error"; }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  Literal* t = new IntLiteral(1);
+  Literal* f = new IntLiteral(0);
+  if( x->getValue() > y->getValue() ){
+        return t;}
+  else return f;
+}
+
+const Literal* EqEqBinaryNode::eval() const {
+  if(!left || !right) {throw "error"; }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  Literal* t = new IntLiteral(1);
+  Literal* f = new IntLiteral(0);
+  if( x->getValue() == y->getValue() ){
+        return t;}
+  else return f;
+
+}
+const Literal* NotEqBinaryNode::eval() const {
+  if(!left || !right) {throw "error"; }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  Literal* t = new IntLiteral(1);
+  Literal* f = new IntLiteral(0);
+  if( x->getValue() != y->getValue() ){
+        return t;}
+  else return f;
+
+}
+const Literal* GreaterEqBinaryNode::eval() const {
+  if(!left || !right) {throw "error"; }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  Literal* t = new IntLiteral(1);
+  Literal* f = new IntLiteral(0);
+  if( x->getValue() >= y->getValue() ){
+        return t;}
+  else return f;
+}
+const Literal* LessEqBinaryNode::eval() const {
+  if(!left || !right) {throw "error"; }
+  const Literal* x = left->eval();
+  const Literal* y = right->eval();
+  Literal* t = new IntLiteral(1);
+  Literal* f = new IntLiteral(0);
+  if( x->getValue() <= y->getValue() ){
+        return t;}
+  else return f;
+}
+
